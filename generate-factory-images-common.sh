@@ -145,8 +145,36 @@ if ! [ \$product = $DEVICE ]; then
   echo "These factory images are for $DEVICE and the detected device is \$product."
   exit 1
 fi
-
 EOF
+
+# Notify users when flashing obsolete devices/extended support devices
+extended=(coral flame)
+obsolete=(blueline crosshatch sargo bonito)
+#if [ $DEVICE == coral ] || [ $DEVICE == flame ]
+if [[ "${extended[*]}" =~ "$DEVICE" ]]
+then
+cat >> tmp/$PRODUCT-$VERSION/flash-all.sh << EOF
+echo "WARNING"
+echo "You're using a device with extended support. Full security cannot be guaranteed."
+EOF
+#if [ $DEVICE == blueline ] || [ $DEVICE == crosshatch ] || [ $DEVICE == sargo ] || [ $DEVICE == bonito ]
+if [[ "${obsolete[*]}" =~ "$DEVICE" ]]
+then
+cat >> tmp/$PRODUCT-$VERSION/flash-all.sh << EOF
+echo "WARNING"
+echo "You're using an obsolete device. No more updates will be provided by neither GrapheneOS nor Google. Full security cannot be guaranteed."
+EOF
+#if [ $DEVICE == coral ] || [ $DEVICE == flame ] || [ $DEVICE == blueline ] || [ $DEVICE == crosshatch ] || [ $DEVICE == sargo ] || [ $DEVICE == bonito ]
+if [[ "${extended[*]}" =~ "$DEVICE" ]] || [[ "${obsolete[*]}" =~ "$DEVICE" ]]
+then
+cat >> tmp/$PRODUCT-$VERSION/flash-all.sh << EOF
+read -p "Continue? (y/n) " choice
+echo 
+if [[ ! =~ ^[Yy]$ ]];then
+exit 1
+fi
+EOF
+
 if test "$UNLOCKBOOTLOADER" = "true"
 then
 cat >> tmp/$PRODUCT-$VERSION/flash-all.sh << EOF
